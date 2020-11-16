@@ -66,3 +66,18 @@ let ``Use file with bad cell data for creating board`` () =
     let pathAndFileName = @"C:\Users\dalehu\source\repos\F\PBEM\BadParseMap.txt"
     Assert.Throws<InvalidDataException> (fun () -> CreateBoardFromFile pathAndFileName |> ignore)
 
+[<Fact>]
+let ``Show a valid road path is valid`` () =
+    let pathAndFileName = @"C:\Users\dalehu\source\repos\F\PBEM\SampleMap.txt"
+    let board = CreateBoardFromFile pathAndFileName
+    let cellCount = board.RowCount * board.ColCount
+    let mutable validRoadsFound : bool array = Array.zeroCreate cellCount
+    Assert.True (IsValidRoad board 1 validRoadsFound)
+
+(*
+[<Fact>]
+let ``Show an invalid road net is invalid`` () =
+    let pathAndFileName = @"C:\Users\dalehu\source\repos\F\PBEM\SampleMap.txt"
+    let board = CreateBoardFromFile pathAndFileName
+    Assert.False (IsValidRoadNet board)
+*) 
