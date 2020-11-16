@@ -70,8 +70,7 @@ let ``Use file with bad cell data for creating board`` () =
 let ``Show a valid road path is valid`` () =
     let pathAndFileName = @"C:\Users\dalehu\source\repos\F\PBEM\SampleMap.txt"
     let board = CreateBoardFromFile pathAndFileName
-    let cellCount = board.RowCount * board.ColCount
-    let mutable validRoadsFound : bool array = Array.zeroCreate cellCount
+    let mutable validRoadsFound = CreateBoolArrayOfGrid board
     Assert.True (IsValidRoad board 1 validRoadsFound)
 
 (*

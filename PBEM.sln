@@ -9,7 +9,11 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "PBEM.Tests", "PBEM.Tests\PB
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{87F1A9F5-898B-4D54-BFC0-704115F99424}"
 	ProjectSection(SolutionItems) = preProject
+		BadMap.txt = BadMap.txt
+		BadParseMap.txt = BadParseMap.txt
+		BadRoadMap.txt = BadRoadMap.txt
 		README.md = README.md
+		SampleMap.txt = SampleMap.txt
 	EndProjectSection
 EndProject
 Global

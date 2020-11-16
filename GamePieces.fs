@@ -1,18 +1,13 @@
 ﻿module GamePieces
 
-open System.Drawing
+open System
 
-type PieceID private () =
-    let mutable id = 0
+// ======================================== DATA TYPES ========================================
 
-    static let instance = PieceID ()
-
-    static member Instance = instance
-
-    member this.GetNextID () =
-        id <- id + 1
-        id
-
+(*
+    Period represents the periods (genres) supported by the rules. Period constrains which PieceType
+    values a Piece can have and still be valid.
+*)
 type Period =
     | Ancient = 0
     | DarkAges = 1
@@ -24,6 +19,9 @@ type Period =
     | Machine = 7
     | Modern = 8
 
+(*
+    PieceType represents the standardized characteristics of a Piece.
+*)
 type PieceType =
     | Unknown = -1
     | Infantry = 0
@@ -44,23 +42,40 @@ type PieceType =
     | Levy = 15
     | Crossbowmen = 16
 
+(*
+    Piece represents a game piece commonly known in wargames as "units". That word, however, is a
+    keyword in F#. Note that the characteristics of these pieces are specific to the rules "One-Hour
+    Wargames".
+
+    FUTURE: State represents various effects that can be applied optionally. States such as "shaken",
+    "pinned", etc. are possible.
+*)
 type Piece = {
-    ID : int
+    ID : Guid
     Name : string
     Type : PieceType
     Period : Period
     Hits : int
-    //State : UnitState
+    //State : State
 }
 
-type PieceResult = Result<Piece, unit>
+(*
+    A Piece wrapped in a Result.
+*)
+type PieceResult = Result<Piece, string>
 
+// ======================================== PIECE FUNCTIONS ========================================
+
+(*
+    Indicates whether a Piece is valid by looking at the assigned PieceType and determining if it is
+    valid for indicated Period.
+*)
 let IsValidPiece piecetype period =
     match (period, piecetype) with
     | Period.Ancient, (PieceType.Infantry | PieceType.Archers | PieceType.Skirmishers | PieceType.Cavalry) -> true
     | Period.DarkAges, (PieceType.Infantry | PieceType.Warband | PieceType.Skirmishers | PieceType.Cavalry) -> true
     | Period.Medieval, (PieceType.MenAtArms | PieceType.Levy | PieceType.Crossbowmen | PieceType.Knights) -> true
-    | Period.Pike, (PieceType.Infantry | PieceType.Swordsmen | PieceType.Reiters | PieceType.Artillery) -> true
+    | Period.Pike, (PieceType.Infantry | PieceType.Swordsmen | PieceType.Reiters | PieceType.Cavalry) -> true
     | Period.Musket, (PieceType.Infantry | PieceType.Skirmishers | PieceType.Artillery | PieceType.Cavalry) -> true
     | Period.Rifle, (PieceType.Infantry | PieceType. Skirmishers | PieceType.Artillery | PieceType.Cavalry) -> true
     | Period.ACW, (PieceType.Infantry | PieceType.Zouaves | PieceType.Artillery | PieceType.Cavalry) -> true
@@ -68,11 +83,14 @@ let IsValidPiece piecetype period =
     | Period.Modern, (PieceType.Infantry | PieceType.Mortars | PieceType.AntiTankGuns | PieceType.Tanks) -> true
     | _ -> false
 
+(*
+    Returns a PieceResult (Piece wrapped in a Result) given the values passed to create the piece.
+*)
 let CreatePiece name piecetype period =
     match IsValidPiece piecetype period with
     | true -> 
         Ok {
-            ID = PieceID.Instance.GetNextID ()
+            ID = Guid.NewGuid ()
             Name = name
             Type = piecetype
             Period = period
