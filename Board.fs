@@ -27,10 +27,7 @@ type Terrain =
     with '8' equalling Northwest.
     Example: From = 1 and To = 5 is a road from North to South.
 *)
-type Road = {
-From : int
-To: int
-}
+type Road = int []
 
 (*
     A Cell represent space on the Board, i.e. a square on a square-gridded board or a hex on a hex-
@@ -41,7 +38,7 @@ type Cell = {
     Row : int
     Col : int
     Terrain : Terrain
-    Road : Road option
+    Road : int[] option
     Piece : Piece option
 }
 
@@ -86,6 +83,12 @@ let CalculateRowColFromNumber numColumns cellNumber =
 let CreateBoolArrayOfGrid board =
     Array.zeroCreate (board.RowCount * board.ColCount) : bool[]
 
+(*
+
+*)
+let StringArrayToIntArray strings =
+    Array.map (fun str -> int str) strings
+
 // ======================================== FORWARD FUNCTIONS ========================================
 
 (*
@@ -93,7 +96,7 @@ let CreateBoolArrayOfGrid board =
 *)
 let IsValidRowCol board row col =
     // Is the row or col is 0 or the row or col is outside of the row and column count?
-    if ((row < 1 || row >= board.RowCount) || (col < 1 || col >= board.ColCount)) then false
+    if (row < 1 || row > board.RowCount || col < 1 || col > board.ColCount) then false
     else true
 
 (*
@@ -130,17 +133,15 @@ let ValidateInt mi ma n =
         a : One of the From/To values.
         b : The other of the From/To values.
 *)
-let CreateRoad a b =
-    match a = b with
+let CreateRoad (a : int []) =
+    match a.[0] = 0 with
     | true -> None
-    | _ -> 
+    | false ->
         try
-            Some { From = ValidateInt 1 8 (min a b); To = ValidateInt 1 8 (max a b) }
+            let points : int[] = Array.sort a |> Seq.distinct |> Seq.toArray |> Array.map (fun elem -> ValidateInt 1 8 elem)
+            Some points
         with
-            | ex -> 
-                match a, b with
-                | 0, 0 -> None
-                | _ -> printfn "Removing road %i %i because the values are %s" a b (ex.Message); None
+            | _ as ex -> None
 
 (*
     Recursive function that validate whether a road is valid. It does this by starting at a cell
@@ -149,10 +150,8 @@ let CreateRoad a b =
     board's boundaries attached to that road chain are valid, the function returns true.
 
     Note that roads pointing off-board are still valid.
-
-    TODO: Get rid of the for loops and replace them with list processing functions.
 *)
-let rec IsValidRoad (board : Board) startFromCellNum (validatedCells : bool[]) =
+let rec IsValidRoad board startFromCellNum (validatedCells : bool[]) =
     // Is the current cell already validated?
     match validatedCells.[startFromCellNum] with
     | true -> true
@@ -161,77 +160,53 @@ let rec IsValidRoad (board : Board) startFromCellNum (validatedCells : bool[]) =
         let (row, col) = CalculateRowColFromNumber board.ColCount startFromCellNum
         let cell = GetCell board row col
         match cell with
-        | None -> false
+        | None -> false     // I don't know how we would ever get here!
         | Some c ->
             // Is there a road in this cell?
             match c.Road with
             | None -> false
-            | Some r ->
-                let first = c.Road.Value.From
-                let last = c.Road.Value.To
-
-                printfn "Cell %i, %i road from %i to %i" row col first last
-
+            | Some roadArray ->
                 Array.set validatedCells startFromCellNum true
+                Array.fold (fun result roadDirection ->
+                    (
+                        let mutable destCell = (row, col)
+                        match roadDirection with
+                        | 1 -> destCell <- (row - 1, col)
+                        | 2 -> destCell <- (row - 1, col + 1)
+                        | 3 -> destCell <- (row, col + 1)
+                        | 4 -> destCell <- (row + 1, col + 1)
+                        | 5 -> destCell <- (row + 1, col)
+                        | 6 -> destCell <- (row + 1, col - 1)
+                        | 7 -> destCell <- (row, col - 1)
+                        | _ -> destCell <- (row - 1, col - 1)
 
-                let mutable fromDest = (row, col)
-                let mutable toDest = (row, col)
+                        let toRow, toCol = destCell
+                        let validTo = IsValidRowCol board toRow toCol
 
-                match first with
-                | 1 -> fromDest <- (row - 1, col)
-                | 2 -> fromDest <- (row - 1, col + 1)
-                | 3 -> fromDest <- (row, col + 1)
-                | 4 -> fromDest <- (row + 1, col + 1)
-                | 5 -> fromDest <- (row + 1, col)
-                | 6 -> fromDest <- (row + 1, col - 1)
-                | 7 -> fromDest <- (row, col - 1)
-                | _ -> fromDest <- (row - 1, col - 1)
-
-                match last with
-                | 1 -> toDest <- (row - 1, col)
-                | 2 -> toDest <- (row - 1, col + 1)
-                | 3 -> toDest <- (row, col + 1)
-                | 4 -> toDest <- (row + 1, col + 1)
-                | 5 -> toDest <- (row + 1, col)
-                | 6 -> toDest <- (row + 1, col - 1)
-                | 7 -> toDest <- (row, col - 1)
-                | _ -> toDest <- (row - 1, col - 1)
-
-                let fromRow, fromCol = fromDest
-                let toRow, toCol = toDest
-                let validFrom = IsValidRowCol board fromRow fromCol
-                let validTo = IsValidRowCol board toRow toCol
-
-                match validFrom with
-                | true -> 
-                    (IsValidRoad board (CalculateCellNumber board.ColCount fromRow fromCol) validatedCells) &&
-                    (match validTo with
-                    | true -> IsValidRoad board (CalculateCellNumber board.ColCount toRow toCol) validatedCells
-                    | false -> true)
-                | false -> true
+                        match validTo with
+                        | true -> 
+                            IsValidRoad board (CalculateCellNumber board.ColCount toRow toCol) validatedCells
+                        | false -> true
+                    ) && result
+                ) true roadArray
 
 (*
-let IsValidRoadNet (board : Board) =
-    let cellCount = board.RowCount * board.ColCount
-    // Create an array of bool representing the cells in the board.
-    let mutable roadCells : bool array = Array.zeroCreate cellCount
-    let mutable validRoadCells : bool array = Array.zeroCreate cellCount
-    // Loop through all the cells in the board and see where the roads are.
-    for (c : Cell) in board.Cells do
-        let cellNum = CalculateCellNumber board.ColCount c.Row c.Col
-        match c.Road with
-        | Some road -> roadCells.[cellNum] <- true
-        | None -> ()
-    match (Array.contains true roadCells) with
-    | true ->
-        // Loop through the roadCells and mark validRoadCells as valid or invalid.
-        for bc in roadCells do
-            match bc with
-            | true ->
-                IsValidRoad board 
-            | false -> ()
-    | false -> true
+    Function that checks the entire board for roads, ensuring that they are all valid.
 *)
+let IsValidAllRoads board =
+    let mutable validRoadsFound = CreateBoolArrayOfGrid board
+    List.fold (fun result cell ->
+        (
+            match cell.Road with
+            // Note it may seem wrong to mark a cell with no Road as true. But this is because there 
+            // is no road to check AND we are NOT marking the cell in the validRoadsFound array as
+            // true.
+            | None -> true
+            | Some roadArray ->
+                IsValidRoad board (CalculateCellNumber board.ColCount cell.Row cell.Col) validRoadsFound
+        ) && result
+    ) true board.Cells
+
 
 // ======================================== PIECE FUNCTIONS ========================================
 
@@ -259,15 +234,14 @@ let RemovePieceFromCell piece cell =
         row : The row number of the cell.
         col : The column number of the cell.
         terrain : The type of terrain in the cell.
-        (roadFrom : The direction the road starts from. See type Road for more details.
-        roadTo) : The direction the road goes toward. This is part of a tuple merely to logically group data.
+        roads : The directions the road points to. See type Road for more details.
     *)
-let CreateCell row col terrain (roadFrom, roadTo) =
+let CreateCell row col terrain roads =
     { 
         Row = row
         Col = col
         Terrain = terrain
-        Road = (CreateRoad roadFrom roadTo)
+        Road = (CreateRoad roads)
         Piece = None
     }
 
@@ -309,15 +283,16 @@ let CreateBoardFromDefinition (boardDefinition : string[]) =
     // The first character of the first line must be B
     match boardDefinition.[0].[0] with
     | 'B' ->
-        for line in boardDefinition do
+        Array.iter (fun (line : string) ->
             let parts = line.Split ([|'`'|])
             match parts.[0] with
             | "B" ->
                 board <- { board with RowCount = (int parts.[1]); ColCount = (int parts.[2]) }
             | "C" ->
-                cells <- cells @ [(CreateCell (int parts.[1]) (int parts.[2]) (enum<Terrain> (int parts.[3])) ((int parts.[4]), (int parts.[5])))]
+                cells <- cells @ [(CreateCell (int parts.[1]) (int parts.[2]) (enum<Terrain> (int parts.[3])) (StringArrayToIntArray (parts.[4..(parts.Length - 1)])))]
                 board <- { board with Cells = cells }
             | _ -> raise (new InvalidDataException (sprintf "ERROR: Parsing failure on line %s" line))
+        ) boardDefinition
         if IsValidBoard board then board
         else failwith "Board is invalid"
     | _ -> raise (new InvalidDataException ("ERROR: Invalid header information"))
