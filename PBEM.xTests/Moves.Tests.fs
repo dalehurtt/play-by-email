@@ -1,4 +1,4 @@
-module PBEM.xTests
+module PBEM.xTests.Moves
 
 open System
 open Xunit

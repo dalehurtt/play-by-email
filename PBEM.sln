@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.30621.155
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "PBEM", "PBEM.fsproj", "{FDC0B520-4C06-4D96-8905-292BF18BA7B5}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "PBEM.Tests", "PBEM.Tests\PBEM.Tests.fsproj", "{636221CF-8D6A-446C-B903-957535D61FA6}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{87F1A9F5-898B-4D54-BFC0-704115F99424}"
 	ProjectSection(SolutionItems) = preProject
 		BadMap.txt = BadMap.txt
@@ -32,9 +30,6 @@ Global
 		{FDC0B520-4C06-4D96-8905-292BF18BA7B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FDC0B520-4C06-4D96-8905-292BF18BA7B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FDC0B520-4C06-4D96-8905-292BF18BA7B5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{636221CF-8D6A-446C-B903-957535D61FA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{636221CF-8D6A-446C-B903-957535D61FA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{636221CF-8D6A-446C-B903-957535D61FA6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2ECDB144-C153-431A-A4C0-967D46AF67EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2ECDB144-C153-431A-A4C0-967D46AF67EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2ECDB144-C153-431A-A4C0-967D46AF67EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
