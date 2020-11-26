@@ -62,7 +62,7 @@ type Piece = {
 (*
     A Piece wrapped in a Result.
 *)
-type PieceResult = Result<Piece, string>
+//type PieceResult = Result<Piece, string>
 
 // ======================================== PIECE FUNCTIONS ========================================
 
@@ -89,11 +89,11 @@ let IsValidPiece piecetype period =
 let CreatePiece name piecetype period =
     match IsValidPiece piecetype period with
     | true -> 
-        Ok {
+        Some {
             ID = Guid.NewGuid ()
             Name = name
             Type = piecetype
             Period = period
             Hits = 15
         }
-    | false -> Error "invalid period"
+    | false -> None

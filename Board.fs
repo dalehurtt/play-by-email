@@ -111,6 +111,17 @@ let GetCell board row col =
     | 0 -> None
     | _ -> Some cells.[0]
 
+(*
+
+*)
+let ReplaceCell oldBoard newCell =
+    let (cells : List<Cell>) = oldBoard.Cells |> List.choose (fun c ->
+        match c.Row = newCell.Row && c.Col = newCell.Col with
+        | true -> Some newCell
+        | false -> Some c
+    )
+    cells
+
 // ======================================== ROAD FUNCTIONS ========================================
 
 (*
@@ -226,6 +237,28 @@ let AddPieceToCell piece cell =
 *)
 let RemovePieceFromCell piece cell =
     { cell with Piece = None }
+
+(*
+
+*)
+let MoveGamePiece piece (fromRow, fromCol) (toRow, toCol) board =
+    let fromCell =
+        match fromRow + fromCol with
+        | 0 -> None
+        | _ -> GetCell board fromRow fromCol
+    let toCell = GetCell board toRow toCol
+    let fromBoard =
+        match fromCell with
+        | None -> board
+        | Some fCell ->
+            { board with Cells = ReplaceCell board (RemovePieceFromCell piece fCell) }
+    let toBoard =
+        match toCell with
+        | None -> board
+        | Some toCell ->
+            { fromBoard with Cells = ReplaceCell fromBoard (AddPieceToCell piece toCell) }
+    toBoard
+
 
 // ======================================== CELL FUNCTIONS ========================================
 

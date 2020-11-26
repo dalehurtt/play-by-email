@@ -3,7 +3,6 @@
 open Xunit
 open GamePieces
 
-
 [<Theory>]
 [<InlineData (PieceType.Infantry, Period.Ancient)>]
 [<InlineData (PieceType.Warband, Period.DarkAges)>]
@@ -47,5 +46,6 @@ let ``Tests for invalid game pieces by period`` (gamepiece, period) =
 let ``Creation tests for invalid game pieces by period`` (gamepiece, period) =
     let actual = CreatePiece "A" gamepiece period
     match actual with
-    | Ok piece -> Assert.False (true)
-    | Error message -> Assert.True (true)
+    | Some piece -> Assert.False (true)
+    | None -> Assert.True (true)
+
