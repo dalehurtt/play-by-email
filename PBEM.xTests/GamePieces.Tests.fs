@@ -13,9 +13,9 @@ open GamePieces
 [<InlineData (PieceType.Zouaves, Period.ACW)>]
 [<InlineData (PieceType.HeavyInfantry, Period.Machine)>]
 [<InlineData (PieceType.Tanks, Period.Modern)>]
-let ``Tests for valid game pieces by period`` (gamepiece, period) =
+let ``Tests for valid game pieces by period`` (pieceType, period) =
     let expected = true
-    let actual = IsValidPiece gamepiece period
+    let actual = IsValidPiece pieceType period
     Assert.Equal (expected, actual)
 
 [<Theory>]
@@ -28,9 +28,9 @@ let ``Tests for valid game pieces by period`` (gamepiece, period) =
 [<InlineData (PieceType.Skirmishers, Period.ACW)>]
 [<InlineData (PieceType.Tanks, Period.Machine)>]
 [<InlineData (PieceType.HeavyInfantry, Period.Modern)>]
-let ``Tests for invalid game pieces by period`` (gamepiece, period) =
+let ``Tests for invalid game pieces by period`` (pieceType, period) =
     let expected = false
-    let actual = IsValidPiece gamepiece period
+    let actual = IsValidPiece pieceType period
     Assert.Equal (expected, actual)
 
 [<Theory>]
@@ -43,9 +43,30 @@ let ``Tests for invalid game pieces by period`` (gamepiece, period) =
 [<InlineData (PieceType.Skirmishers, Period.ACW)>]
 [<InlineData (PieceType.Tanks, Period.Machine)>]
 [<InlineData (PieceType.HeavyInfantry, Period.Modern)>]
-let ``Creation tests for invalid game pieces by period`` (gamepiece, period) =
-    let actual = CreatePiece "A" gamepiece period
+let ``Creation tests for invalid game pieces by period`` (pieceType, period) =
+    let actual = CreatePiece Side.Red "A" pieceType period  1
     match actual with
     | Some piece -> Assert.False (true)
     | None -> Assert.True (true)
+
+[<Theory>]
+[<InlineData (1)>]
+[<InlineData (3)>]
+[<InlineData (5)>]
+[<InlineData (7)>]
+let ``Create a game piece facing a valid direction`` facing =
+    let actual = CreatePiece Side.Red "A" PieceType.Infantry Period.Ancient facing
+    Assert.True (actual.IsSome)
+    Assert.True (actual.Value.Facing = facing)
+
+[<Theory>]
+[<InlineData (0)>]
+[<InlineData (2)>]
+[<InlineData (4)>]
+[<InlineData (6)>]
+[<InlineData (8)>]
+[<InlineData (9)>]
+let ``Create a game piece facing an invalid direction`` facing =
+    let actual = CreatePiece Side.Red "A" PieceType.Infantry Period.Ancient facing
+    Assert.True (actual.IsNone)
 

@@ -51,6 +51,8 @@ type Board = {
     RowCount : int
     ColCount : int
     Cells : List<Cell>
+    Off : List<Piece>
+    Dead : List<Piece>
 }
 
 // ======================================== CALCULATION FUNCTIONS ========================================
@@ -312,7 +314,7 @@ let IsValidBoard (board : Board) =
 *)
 let CreateBoardFromDefinition (boardDefinition : string[]) =
     let mutable cells : List<Cell> = List<Cell>.Empty
-    let mutable board = { RowCount = 0; ColCount = 0; Cells = cells }
+    let mutable board = { RowCount = 0; ColCount = 0; Cells = cells; Off = List<Piece>.Empty; Dead = List<Piece>.Empty }
     // The first character of the first line must be B
     match boardDefinition.[0].[0] with
     | 'B' ->

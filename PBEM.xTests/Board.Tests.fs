@@ -4,6 +4,7 @@ open Xunit
 open Board
 open System
 open System.IO
+open GamePieces
 
 [<Fact>]
 let ``Create valid board test`` () =
@@ -13,7 +14,7 @@ let ``Create valid board test`` () =
         CreateCell 2 1 Terrain.Woods [| 0 |];
         CreateCell 2 2 Terrain.Flat [| 0 |]
     ]
-    let board = { RowCount = 2; ColCount = 2; Cells = cells}
+    let board = { RowCount = 2; ColCount = 2; Cells = cells; Off = List<Piece>.Empty; Dead = List<Piece>.Empty }
     let expected = true
     let actual = IsValidBoard board
     Assert.Equal (expected, actual)
@@ -25,7 +26,7 @@ let ``Create invalid board test (missing cell)`` () =
         CreateCell 1 2 Terrain.Flat [| 0 |];
         CreateCell 2 2 Terrain.Flat [| 0 |]
     ]
-    let board = { RowCount = 2; ColCount = 2; Cells = cells}
+    let board = { RowCount = 2; ColCount = 2; Cells = cells; Off = List<Piece>.Empty; Dead = List<Piece>.Empty }
     let expected = false
     let actual = IsValidBoard board
     Assert.Equal (expected, actual)
@@ -38,7 +39,7 @@ let ``Create invalid board test (cell duplicated)`` () =
         CreateCell 2 2 Terrain.Flat [| 0 |];
         CreateCell 2 2 Terrain.Flat [| 0 |]
     ]
-    let board = { RowCount = 2; ColCount = 2; Cells = cells}
+    let board = { RowCount = 2; ColCount = 2; Cells = cells; Off = List<Piece>.Empty; Dead = List<Piece>.Empty }
     let expected = false
     let actual = IsValidBoard board
     Assert.Equal (expected, actual)

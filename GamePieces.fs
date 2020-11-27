@@ -43,6 +43,11 @@ type PieceType =
     | Crossbowmen = 16
 
 (*
+
+*)
+type Side = Red | Blue
+
+(*
     Piece represents a game piece commonly known in wargames as "units". That word, however, is a
     keyword in F#. Note that the characteristics of these pieces are specific to the rules "One-Hour
     Wargames".
@@ -57,6 +62,8 @@ type Piece = {
     Period : Period
     Hits : int
     //State : State
+    Facing : int
+    Side : Side
 }
 
 (*
@@ -84,16 +91,41 @@ let IsValidPiece piecetype period =
     | _ -> false
 
 (*
+Validate that an int falls within acceptable boundaries for facing (which is direction 1, 3, 5, and 7).
+    n  : The value to validate.
+*)
+let IsValidFacing n =
+    match n with
+    | 1|3|5|7 -> true
+    | _ -> false
+
+(*
     Returns a PieceResult (Piece wrapped in a Result) given the values passed to create the piece.
 *)
-let CreatePiece name piecetype period =
+let CreatePiece side name piecetype period facing =
     match IsValidPiece piecetype period with
     | true -> 
-        Some {
-            ID = Guid.NewGuid ()
-            Name = name
-            Type = piecetype
-            Period = period
-            Hits = 15
-        }
+        match IsValidFacing facing with
+        | true ->
+            Some {
+                ID = Guid.NewGuid ()
+                Name = name
+                Type = piecetype
+                Period = period
+                Hits = 15
+                Facing = facing
+                Side = side
+            }
+        | false -> None
     | false -> None
+
+(*
+
+*)
+let ChangeFacing facing (piece : Piece option) =
+    match piece.IsSome with
+    | true -> 
+        match IsValidFacing facing with
+        | true -> Some { piece.Value with Facing = facing }
+        | false -> piece
+    | false -> piece

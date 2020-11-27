@@ -8,6 +8,7 @@
   <ItemGroup>
     <Compile Include="GamePieces.fs" />
     <Compile Include="Board.fs" />
+    <Compile Include="Setup.fs" />
     <Compile Include="Program.fs" />
     <None Include="Script.fsx" />
   </ItemGroup>
