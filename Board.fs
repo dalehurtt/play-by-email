@@ -357,6 +357,7 @@ let CreateBoardFromFile fileNameAndPath =
     and game pieces displayed.
 *)
 let VisualizeMap board =
+    let bgColor = Console.BackgroundColor
     // Loop through all of the rows
     for i in 1..board.RowCount do
         // Draw the top border of the cell
@@ -374,12 +375,12 @@ let VisualizeMap board =
                     printf "|"
                     Console.BackgroundColor <- ConsoleColor.DarkYellow
                     printf "  HILL  "
-                    Console.BackgroundColor <- ConsoleColor.Black
+                    Console.BackgroundColor <- bgColor
                 | _ -> printf "|       "
             | None ->
                 Console.BackgroundColor <- ConsoleColor.Red
                 printfn "| ERR  "
-                Console.BackgroundColor <- ConsoleColor.Black
+                Console.BackgroundColor <- bgColor
         printfn "|"
         // Draw the roads in the cell
         for j in 1..board.ColCount do
@@ -393,7 +394,7 @@ let VisualizeMap board =
             | None ->
                 Console.BackgroundColor <- ConsoleColor.Red
                 printf "|  ERR   "
-                Console.BackgroundColor <- ConsoleColor.Black
+                Console.BackgroundColor <- bgColor
         printfn "|"
         // Draw the game pieces on the board
         for j in 1..board.ColCount do
@@ -406,13 +407,13 @@ let VisualizeMap board =
                     if p.Side = Side.Red then Console.BackgroundColor <- ConsoleColor.Red
                     else Console.BackgroundColor <- ConsoleColor.Blue
                     printf "%6s %s" p.Name  (FacingToString p.Facing)
-                    Console.BackgroundColor <- ConsoleColor.Black
+                    Console.BackgroundColor <- bgColor
                 | None -> printf "|        "
             | None ->
                 printf "|"
                 Console.BackgroundColor <- ConsoleColor.Red
                 printf "  ERR   "
-                Console.BackgroundColor <- ConsoleColor.Black
+                Console.BackgroundColor <- bgColor
         printfn "|"
     // Draw the border on the bottom of the grid
     for _ in 1..board.ColCount do
@@ -428,7 +429,7 @@ let VisualizeMap board =
                 if p.Side = Side.Red then Console.BackgroundColor <- ConsoleColor.Red
                 else Console.BackgroundColor <- ConsoleColor.Blue
                 printf " %6s" p.Name
-                Console.BackgroundColor <- ConsoleColor.Black
+                Console.BackgroundColor <- bgColor
             | None -> ()
     else printf " None"
     printfn ""
@@ -442,7 +443,7 @@ let VisualizeMap board =
                 if p.Side = Side.Red then Console.BackgroundColor <- ConsoleColor.Red
                 else Console.BackgroundColor <- ConsoleColor.Blue
                 printf " %6s" p.Name
-                Console.BackgroundColor <- ConsoleColor.Black
+                Console.BackgroundColor <- bgColor
             | None -> ()
     else printf " None"
     printfn ""
