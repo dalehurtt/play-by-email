@@ -1,8 +1,8 @@
 ﻿module Board
 
 open System
-open GamePieces
 open System.IO
+open Pieces
 
 // ======================================== DATA TYPES ========================================
 
@@ -10,6 +10,7 @@ open System.IO
     Terrain is an enumeration to represent the terrain in the grid. Note that this can easily be expanded
     by adding new values to the list, i.e. High Hills, Wooded Hills, Muddy Ground, etc.
 *)
+// #NO_DEPENDENCY
 type Terrain =
     | Flat = 0
     | Woods = 1
@@ -22,11 +23,13 @@ type Terrain =
     | Ford = 8
     
 (*
-    A Road references the two ends. The From is always the lower number, while the To is the larger. 
-    Further, the two values cannot be the same. A value of '1' points due North, counting clockwise 
-    with '8' equalling Northwest.
-    Example: From = 1 and To = 5 is a road from North to South.
+    A Road references a minimum of two ends and a maximum of 8. The numbers are always ordered from
+    lowest to highest with no duplicates. A value of '1' points due North, counting clockwise with 
+    '8' equalling Northwest.
+
+    Example: [| 1; 5 |] is a road from North to South.
 *)
+// #NO_DEPENDENCY
 type Road = int []
 
 (*
@@ -46,6 +49,9 @@ type Cell = {
     The Board represents the playing surface of the game. It has a reference to the number of rows 
     and columns and a list of all of the Cells that comprise the board, i.e. the squares in a 
     square-gridded game or the hexes in a hex-gridded game.
+
+    TODO: Change the Off and Dead lists from List<Piece option> to List<Piece>. These lists should
+    always contain only pieces and never have None.
 *)
 type Board = {
     RowCount : int
@@ -60,17 +66,21 @@ type Board = {
 (*
     Calculate a cell location into a single dimensional array based on the number of columns on the board,
     the cell's row, and the cell's column numbers.
+
     For example for a 3 x 3 grid: row 1, column 1 would return 0; row 2, column 2 would return 4; and row
     3, column 3 would return 8.
 *)
+// #NO_DEPENDENCY
 let CalculateCellNumber numColumns rowNum colNum =
     ((rowNum - 1) * numColumns) + (colNum - 1)
 
 (*
     Calculate the row and column values of a cell given the number of the cell in a single-dimension array.
-    For example a cellNumber of: 0 would be row 1, column 1; 4 would be row 2, col 2 of a 3 x 3 grid; and 
-    8 would be row 3, column 3 of a 3 x 3 grid.
+
+    For example, for a 3 x 3 grid a cellNumber of: 0 would be row 1, column 1; 4 would be row 2, col 2; and 
+    8 would be row 3, column 3.
 *)
+// #NO_DEPENDENCY
 let CalculateRowColFromNumber numColumns cellNumber =
     let numRows = cellNumber / numColumns
     let row = numRows + 1
@@ -82,12 +92,14 @@ let CalculateRowColFromNumber numColumns cellNumber =
     You can use these arrays to "check off" locations in the grid that have roads, have been checked,
     etc.
 *)
-let CreateBoolArrayOfGrid board =
-    Array.zeroCreate (board.RowCount * board.ColCount) : bool[]
+// #NO_DEPENDENCY
+let CreateBoolArrayOfGrid rows cols =
+    Array.zeroCreate (rows * cols) : bool[]
 
 (*
 
 *)
+// #NO_DEPENDENCY
 let StringArrayToIntArray strings =
     Array.map (fun str -> int str) strings
 
@@ -96,9 +108,10 @@ let StringArrayToIntArray strings =
 (*
     Returns whether a grid location (indicated by row and column) is a valid location on the board.
 *)
-let IsValidRowCol board row col =
+// #NO_DEPENDENCY
+let IsValidRowCol rowCount colCount row col =
     // Is the row or col is 0 or the row or col is outside of the row and column count?
-    if (row < 1 || row > board.RowCount || col < 1 || col > board.ColCount) then false
+    if (row < 1 || row > rowCount || col < 1 || col > colCount) then false
     else true
 
 (*
@@ -107,17 +120,17 @@ let IsValidRowCol board row col =
     duplicated. Given that, this function searches through the list of cells to find the first cell
     that matches.
 *)
-let GetCell board row col =
-    let cells = board.Cells |> List.filter (fun c -> c.Row = row && c.Col = col)
-    match cells.Length with
+let GetCell cells row col =
+    let matches = cells |> List.filter (fun c -> c.Row = row && c.Col = col)
+    match matches.Length with
     | 0 -> None
-    | _ -> Some cells.[0]
+    | _ -> Some matches.[0]
 
 (*
-
+    Replaces a cell in the list of cells provided.
 *)
-let ReplaceCell oldBoard newCell =
-    let (cells : List<Cell>) = oldBoard.Cells |> List.choose (fun c ->
+let ReplaceCell oldCells newCell =
+    let (cells : List<Cell>) = oldCells |> List.choose (fun c ->
         match c.Row = newCell.Row && c.Col = newCell.Col with
         | true -> Some newCell
         | false -> Some c
@@ -133,6 +146,7 @@ let ReplaceCell oldBoard newCell =
         n  : The value to validate.
     NOTE this will throw an ArgumentOutOfRange exception if the value is out of the range indicated.
 *)
+// #NO_DEPENDENCY
 let ValidateInt mi ma n =
     match n with
     | n when n >= mi && n <= ma -> n
@@ -171,7 +185,7 @@ let rec IsValidRoad board startFromCellNum (validatedCells : bool[]) =
     | false ->
         // Get the row and column of the cell, then get the cell itself.
         let (row, col) = CalculateRowColFromNumber board.ColCount startFromCellNum
-        let cell = GetCell board row col
+        let cell = GetCell board.Cells row col
         match cell with
         | None -> false     // I don't know how we would ever get here!
         | Some c ->
@@ -194,7 +208,7 @@ let rec IsValidRoad board startFromCellNum (validatedCells : bool[]) =
                         | _ -> destCell <- (row - 1, col - 1)
 
                         let toRow, toCol = destCell
-                        let validTo = IsValidRowCol board toRow toCol
+                        let validTo = IsValidRowCol board.RowCount board.ColCount toRow toCol
 
                         match validTo with
                         | true -> 
@@ -207,7 +221,7 @@ let rec IsValidRoad board startFromCellNum (validatedCells : bool[]) =
     Function that checks the entire board for roads, ensuring that they are all valid.
 *)
 let IsValidAllRoads board =
-    let mutable validRoadsFound = CreateBoolArrayOfGrid board
+    let mutable validRoadsFound = CreateBoolArrayOfGrid board.RowCount board.ColCount
     List.fold (fun result cell ->
         (
             match cell.Road with
@@ -234,35 +248,34 @@ let AddPieceToCell piece cell =
 (*
     Return a cell after removing a piece from it.
 
-    TODO: You cannot remove a piece if none is there, can you?
+    TODO: You cannot remove a piece if none is there.
     TODO: Is the piece being passed the piece that is actually in the cell?
 *)
 let RemovePieceFromCell piece cell =
     { cell with Piece = None }
 
 (*
-
+    Moves a game piece from one cell to another on the board.
 *)
 let MoveGamePiece (piece : Piece option) (fromRow, fromCol) (toRow, toCol) board =
     let fromCell =
         match fromRow + fromCol with
         | 0 -> None
-        | _ -> GetCell board fromRow fromCol
-    let toCell = GetCell board toRow toCol
+        | _ -> GetCell board.Cells fromRow fromCol
+    let toCell = GetCell board.Cells toRow toCol
     let fromBoard =
         match fromCell with
         | None -> board
         | Some fCell ->
-            { board with Cells = ReplaceCell board (RemovePieceFromCell piece fCell) }
+            { board with Cells = ReplaceCell board.Cells (RemovePieceFromCell piece fCell) }
     let toBoard =
         match toCell with
         | None ->
             let newOff = piece :: fromBoard.Off
             { fromBoard with Off = newOff }
         | Some toCell ->
-            { fromBoard with Cells = ReplaceCell fromBoard (AddPieceToCell piece toCell) }
+            { fromBoard with Cells = ReplaceCell fromBoard.Cells (AddPieceToCell piece toCell) }
     toBoard
-
 
 // ======================================== CELL FUNCTIONS ========================================
 
@@ -366,7 +379,7 @@ let VisualizeMap board =
         printfn "+"
         // Draw the terrain in the cell
         for j in 1..board.ColCount do
-            let cell = GetCell board i j
+            let cell = GetCell board.Cells i j
             match cell with
             | Some c ->
                 match c.Terrain with
@@ -384,7 +397,7 @@ let VisualizeMap board =
         printfn "|"
         // Draw the roads in the cell
         for j in 1..board.ColCount do
-            let cell = GetCell board i j
+            let cell = GetCell board.Cells i j
             match cell with
             | Some c ->
                 let roads = c.Road
@@ -398,7 +411,7 @@ let VisualizeMap board =
         printfn "|"
         // Draw the game pieces on the board
         for j in 1..board.ColCount do
-            let cell = GetCell board i j
+            let cell = GetCell board.Cells i j
             match cell with
             | Some c ->
                 match c.Piece with

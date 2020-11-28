@@ -1,7 +1,7 @@
 ﻿module Setup
 
 open System.IO
-open GamePieces
+open Pieces
 open Board
 open System
 

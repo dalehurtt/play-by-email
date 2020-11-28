@@ -1,4 +1,4 @@
-﻿module GamePieces
+﻿module Pieces
 
 open System
 

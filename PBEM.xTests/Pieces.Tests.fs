@@ -1,7 +1,7 @@
-﻿module PBEM.xTests.GamePieces
+﻿module PBEM.xTests.Pieces
 
 open Xunit
-open GamePieces
+open Pieces
 
 [<Theory>]
 [<InlineData (PieceType.Infantry, Period.Ancient)>]

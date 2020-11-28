@@ -6,10 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="GamePieces.fs" />
+    <Compile Include="Pieces.fs" />
     <Compile Include="Board.fs" />
     <Compile Include="Setup.fs" />
     <Compile Include="Moves.fs" />
+    <Compile Include="Utilities.fs" />
     <Compile Include="Program.fs" />
     <None Include="Script.fsx" />
   </ItemGroup>

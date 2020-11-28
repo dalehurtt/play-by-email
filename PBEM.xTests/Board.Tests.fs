@@ -3,8 +3,9 @@
 open System
 open System.IO
 open Xunit
+open Utilities
 open Board
-open GamePieces
+open Pieces
 
 [<Fact>]
 let ``Create valid board test`` () =
@@ -46,68 +47,58 @@ let ``Create invalid board test (cell duplicated)`` () =
     
 [<Fact>]
 let ``Create valid board from file test`` () =
-    let path = __SOURCE_DIRECTORY__
-    let pathAndFileName = (sprintf @"%s\SampleMap.txt" path)
+    let pathAndFileName = PrependSourcePath "SampleMap.txt"
     let board = CreateBoardFromFile pathAndFileName
-    Assert.Equal (board.RowCount, 3)
-    Assert.Equal (board.ColCount, 3)
-    Assert.Equal (board.Cells.Length, 9)
+    Assert.Equal (board.RowCount, 6)
+    Assert.Equal (board.ColCount, 6)
+    Assert.Equal (board.Cells.Length, 36)
 
 [<Fact>]
 let ``Provide invalid filename for creating board`` () =
-    let path = __SOURCE_DIRECTORY__
-    let pathAndFileName = (sprintf @"%s\Map.txt" path)
+    let pathAndFileName = PrependSourcePath "Map.txt"
     Assert.Throws<FileNotFoundException> (fun () -> CreateBoardFromFile pathAndFileName |> ignore)
 
 [<Fact>]
 let ``Use file without correct header for creating board`` () =
-    let path = __SOURCE_DIRECTORY__
-    let pathAndFileName = (sprintf @"%s\BadMap.txt" path)
+    let pathAndFileName = PrependSourcePath "BadMap.txt"
     Assert.Throws<InvalidDataException> (fun () -> CreateBoardFromFile pathAndFileName |> ignore)
 
 [<Fact>]
 let ``Use file with bad cell data for creating board`` () =
-    let path = __SOURCE_DIRECTORY__
-    let pathAndFileName = (sprintf @"%s\BadParseMap.txt" path)
+    let pathAndFileName = PrependSourcePath "BadParseMap.txt"
     Assert.Throws<InvalidDataException> (fun () -> CreateBoardFromFile pathAndFileName |> ignore)
 
 [<Fact>]
 let ``Show a valid road path is valid`` () =
-    let path = __SOURCE_DIRECTORY__
-    let pathAndFileName = (sprintf @"%s\SampleMap.txt" path)
+    let pathAndFileName = PrependSourcePath "SampleMap.txt"
     let board = CreateBoardFromFile pathAndFileName
-    let mutable validRoadsFound = CreateBoolArrayOfGrid board
-    Assert.True (IsValidRoad board 1 validRoadsFound)
+    Assert.True (IsValidBoard board)
+    Assert.True (IsValidAllRoads board)
 
 [<Fact>]
 let ``Show an invalid road path is invalid`` () =
-    let path = __SOURCE_DIRECTORY__
-    let pathAndFileName = (sprintf @"%s\BadRoadMap.txt" path)
+    let pathAndFileName = PrependSourcePath "BadRoadMap.txt"
     let board = CreateBoardFromFile pathAndFileName
-    let mutable validRoadsFound = CreateBoolArrayOfGrid board
-    Assert.False (IsValidRoad board 1 validRoadsFound)
+    Assert.True (IsValidBoard board)
+    Assert.False (IsValidAllRoads board)
 
 [<Fact>]
 let ``Map with four-way intersection is valid`` () =
-    let path = __SOURCE_DIRECTORY__
-    let pathAndFileName = (sprintf @"%s\FourWayIntersection.txt" path)
+    let pathAndFileName = PrependSourcePath "FourWayIntersection.txt"
     let board = CreateBoardFromFile pathAndFileName
-    let mutable validRoadsFound = CreateBoolArrayOfGrid board
     Assert.True (IsValidBoard board)
-    Assert.True (IsValidRoad board 1 validRoadsFound)
+    Assert.True (IsValidAllRoads board)
 
 [<Fact>]
 let ``Map with two roads is valid`` () =
-    let path = __SOURCE_DIRECTORY__
-    let pathAndFileName = (sprintf @"%s\TwoRoadsMap.txt" path)
+    let pathAndFileName = PrependSourcePath "TwoRoadsMap.txt"
     let board = CreateBoardFromFile pathAndFileName
     Assert.True (IsValidBoard board)
     Assert.True (IsValidAllRoads board)
 
 [<Fact>]
 let ``Map with two roads is invalid`` () =
-    let path = __SOURCE_DIRECTORY__
-    let pathAndFileName = (sprintf @"%s\BadTwoRoadsMap.txt" path)
+    let pathAndFileName = PrependSourcePath "BadTwoRoadsMap.txt"
     let board = CreateBoardFromFile pathAndFileName
     Assert.True (IsValidBoard board)
     Assert.False (IsValidAllRoads board)

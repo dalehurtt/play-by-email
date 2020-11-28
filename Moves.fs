@@ -3,7 +3,7 @@
 open System
 open System.IO
 open Board
-open GamePieces
+open Pieces
 open System.IO
 
 let ProcessMovesFromDefinition (board : Board) (definition : string[]) : Board =
@@ -22,7 +22,7 @@ let ProcessMovesFromDefinition (board : Board) (definition : string[]) : Board =
         | "M" ->
             let (fromRow, fromCol) = (int parts.[2]), (int parts.[3])
             let (toRow, toCol) = (int parts.[4]), (int parts.[5])
-            let cell = GetCell newBoard fromRow fromCol
+            let cell = GetCell newBoard.Cells fromRow fromCol
             match cell with
             | Some c ->
                 let piece = c.Piece
@@ -34,7 +34,7 @@ let ProcessMovesFromDefinition (board : Board) (definition : string[]) : Board =
                 printfn "ERR Move piece from %i %i to %i %i: invalid from cell" fromRow fromCol toRow toCol
         | "F" ->
             let (fromRow, fromCol) = (int parts.[2]), (int parts.[3])
-            let mutable cell = GetCell newBoard fromRow fromCol
+            let mutable cell = GetCell newBoard.Cells fromRow fromCol
             let facing = (int parts.[4])
             match IsValidFacing facing with
             | true ->
@@ -45,7 +45,7 @@ let ProcessMovesFromDefinition (board : Board) (definition : string[]) : Board =
                     | Some p -> 
                         piece <- ChangeFacing facing piece
                         cell <- Some { cell.Value with Piece = piece }
-                        newBoard <- { newBoard with Cells = (ReplaceCell newBoard cell.Value) }
+                        newBoard <- { newBoard with Cells = (ReplaceCell newBoard.Cells cell.Value) }
                     | None -> printfn "ERR Change piece facing in %i %i to %i: no piece" fromRow fromCol facing
                 | None -> printfn "ERR Change piece facing in %i %i to %i: invalid cell" fromRow fromCol facing
             | false -> printfn "ERR Change piece facing in %i %i to %i: invalid facing" fromRow fromCol facing
