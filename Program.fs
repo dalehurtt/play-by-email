@@ -1,6 +1,7 @@
 ﻿open System
+open Moves
+open Setup
 open Board
-open GamePieces
 
 [<EntryPoint>]
 let main argv =
@@ -8,14 +9,16 @@ let main argv =
 
     // Test board creation
     let path = __SOURCE_DIRECTORY__
-    let board = CreateBoardFromFile (sprintf @"%s\SampleMap.txt" path)
+    let mutable board = CreateBoardFromFile (sprintf @"%s\SampleMap.txt" path)
 
     // Test unit creation
-    let redinf1 = CreatePiece Side.Red "Red Infanty 1" PieceType.Infantry Period.Ancient 1
-    let blueinf1 = CreatePiece Side.Blue "Blue Infantry 1" PieceType.Infantry Period.Ancient 1
+    board <- ProcessSetupFromFile (sprintf @"%s\SampleSetup.txt" path) board
+    VisualizeMap board
 
-    // Test unit placement
+    // Test unit moves
+    board <- ProcessMovesFromFile (sprintf @"%s\SampleMoves.txt" path) board
+    VisualizeMap board
 
-
-    System.Console.ReadKey () |> ignore
+    Console.WriteLine "Press any key to continue"
+    Console.ReadKey () |> ignore
     0 // return an integer exit code

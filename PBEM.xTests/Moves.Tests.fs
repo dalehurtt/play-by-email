@@ -45,22 +45,24 @@ let ``Move game piece from one cell to another while changing facing`` (facing, 
 let ``Process setup definition`` () =
     let setupDefinition = [|
         "S`RED`6";
-        "P`RED INF 01`0`0`1`2`1";
-        "P`RED INF 02`0`0`3`2`2";
-        "P`RED INF 03`0`0`1`0`0";
-        "P`RED SK 01`1`0`1`0`0";
-        "P`RED CAV 01`3`0`1`0`0";
-        "P`RED CAV 02`3`0`1`0`0";
+        "P`INF 01`0`0`1`2`1";
+        "P`INF 02`0`0`3`2`2";
+        "P`INF 03`0`0`1`0`0";
+        "P`SKR 01`1`0`1`0`0";
+        "P`CAV 01`3`0`1`0`0";
+        "P`CAV 02`3`0`1`0`0";
         "S`BLUE`6";
-        "P`BLUE INF 01`0`0`5`1`1";
-        "P`BLUE INF 02`0`0`3`1`2";
-        "P`BLUE INF 03`0`0`5`0`0";
-        "P`BLUE SK 01`1`0`5`0`0";
-        "P`BLUE SK 02`1`0`5`0`0";
-        "P`BLUE CAV 01`3`0`5`0`0"
+        "P`INF 01`0`0`5`1`1";
+        "P`INF 02`0`0`3`1`2";
+        "P`INF 03`0`0`5`0`0";
+        "P`SKR 01`1`0`5`0`0";
+        "P`SKR 02`1`0`5`0`0";
+        "P`CAV 01`3`0`5`0`0"
     |]
     let setup = ProcessSetupFromDefinition board setupDefinition
     Assert.True ((GetCell setup 1 1).Value.Piece.Value.Facing = 5)
     Assert.True ((GetCell setup 1 2).Value.Piece.Value.Facing = 3)
     Assert.True ((GetCell setup 2 1).Value.Piece.Value.Facing = 1)
     Assert.True ((GetCell setup 2 2).Value.Piece.Value.Facing = 3)
+    Assert.True (setup.Off.Length = 8)
+    

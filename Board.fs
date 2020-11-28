@@ -51,8 +51,8 @@ type Board = {
     RowCount : int
     ColCount : int
     Cells : List<Cell>
-    Off : List<Piece>
-    Dead : List<Piece>
+    Off : List<Piece option>
+    Dead : List<Piece option>
 }
 
 // ======================================== CALCULATION FUNCTIONS ========================================
@@ -243,7 +243,7 @@ let RemovePieceFromCell piece cell =
 (*
 
 *)
-let MoveGamePiece piece (fromRow, fromCol) (toRow, toCol) board =
+let MoveGamePiece (piece : Piece option) (fromRow, fromCol) (toRow, toCol) board =
     let fromCell =
         match fromRow + fromCol with
         | 0 -> None
@@ -256,7 +256,9 @@ let MoveGamePiece piece (fromRow, fromCol) (toRow, toCol) board =
             { board with Cells = ReplaceCell board (RemovePieceFromCell piece fCell) }
     let toBoard =
         match toCell with
-        | None -> board
+        | None ->
+            let newOff = piece :: fromBoard.Off
+            { fromBoard with Off = newOff }
         | Some toCell ->
             { fromBoard with Cells = ReplaceCell fromBoard (AddPieceToCell piece toCell) }
     toBoard
@@ -314,7 +316,7 @@ let IsValidBoard (board : Board) =
 *)
 let CreateBoardFromDefinition (boardDefinition : string[]) =
     let mutable cells : List<Cell> = List<Cell>.Empty
-    let mutable board = { RowCount = 0; ColCount = 0; Cells = cells; Off = List<Piece>.Empty; Dead = List<Piece>.Empty }
+    let mutable board = { RowCount = 0; ColCount = 0; Cells = cells; Off = List<Piece option>.Empty; Dead = List<Piece option>.Empty }
     // The first character of the first line must be B
     match boardDefinition.[0].[0] with
     | 'B' ->
@@ -350,3 +352,97 @@ let CreateBoardFromFile fileNameAndPath =
         | :? InvalidDataException as idex -> raise idex
         | _ as ex -> raise ex
 
+(*
+    Visualize the map of the game board. This draws a grid to the console with the terrain, roads,
+    and game pieces displayed.
+*)
+let VisualizeMap board =
+    // Loop through all of the rows
+    for i in 1..board.RowCount do
+        // Draw the top border of the cell
+        for _ in 1..board.ColCount do
+            printf "+--------"
+        printfn "+"
+        // Draw the terrain in the cell
+        for j in 1..board.ColCount do
+            let cell = GetCell board i j
+            match cell with
+            | Some c ->
+                match c.Terrain with
+                | Terrain.Flat -> printf "|        "
+                | Terrain.Hills ->
+                    printf "|"
+                    Console.BackgroundColor <- ConsoleColor.DarkYellow
+                    printf "  HILL  "
+                    Console.BackgroundColor <- ConsoleColor.Black
+                | _ -> printf "|       "
+            | None ->
+                Console.BackgroundColor <- ConsoleColor.Red
+                printfn "| ERR  "
+                Console.BackgroundColor <- ConsoleColor.Black
+        printfn "|"
+        // Draw the roads in the cell
+        for j in 1..board.ColCount do
+            let cell = GetCell board i j
+            match cell with
+            | Some c ->
+                let roads = c.Road
+                if roads.IsSome  && roads.Value.Length > 0 then
+                    printf "| %6s " (Array.fold (fun acc ele -> acc + (FacingToString ele)) "" roads.Value)
+                else printf "|        "
+            | None ->
+                Console.BackgroundColor <- ConsoleColor.Red
+                printf "|  ERR   "
+                Console.BackgroundColor <- ConsoleColor.Black
+        printfn "|"
+        // Draw the game pieces on the board
+        for j in 1..board.ColCount do
+            let cell = GetCell board i j
+            match cell with
+            | Some c ->
+                match c.Piece with
+                | Some p -> 
+                    printf "|"
+                    if p.Side = Side.Red then Console.BackgroundColor <- ConsoleColor.Red
+                    else Console.BackgroundColor <- ConsoleColor.Blue
+                    printf "%6s %s" p.Name  (FacingToString p.Facing)
+                    Console.BackgroundColor <- ConsoleColor.Black
+                | None -> printf "|        "
+            | None ->
+                printf "|"
+                Console.BackgroundColor <- ConsoleColor.Red
+                printf "  ERR   "
+                Console.BackgroundColor <- ConsoleColor.Black
+        printfn "|"
+    // Draw the border on the bottom of the grid
+    for _ in 1..board.ColCount do
+        printf "+--------"
+    printfn "+"
+    // Draw the game pieces off the board
+    printf "Off-board Pieces:"
+    if board.Off.Length > 0 then
+        for i in 0..board.Off.Length - 1 do
+            let piece = board.Off.[i]
+            match piece with
+            | Some p ->
+                if p.Side = Side.Red then Console.BackgroundColor <- ConsoleColor.Red
+                else Console.BackgroundColor <- ConsoleColor.Blue
+                printf " %6s" p.Name
+                Console.BackgroundColor <- ConsoleColor.Black
+            | None -> ()
+    else printf " None"
+    printfn ""
+    // Draw the game pieces that are dead
+    printf "Dead Pieces:"
+    if board.Dead.Length > 0 then
+        for i in 0..board.Dead.Length - 1 do
+            let piece = board.Dead.[i]
+            match piece with
+            | Some p ->
+                if p.Side = Side.Red then Console.BackgroundColor <- ConsoleColor.Red
+                else Console.BackgroundColor <- ConsoleColor.Blue
+                printf " %6s" p.Name
+                Console.BackgroundColor <- ConsoleColor.Black
+            | None -> ()
+    else printf " None"
+    printfn ""

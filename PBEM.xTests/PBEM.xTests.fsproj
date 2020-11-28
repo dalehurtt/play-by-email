@@ -9,7 +9,6 @@
     <Compile Include="Board.Tests.fs" />
     <Compile Include="GamePieces.Tests.fs" />
     <Compile Include="Moves.Tests.fs" />
-    <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.0" />

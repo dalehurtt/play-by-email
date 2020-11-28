@@ -100,6 +100,17 @@ let IsValidFacing n =
     | _ -> false
 
 (*
+
+*)
+let FacingToString facing =
+    match facing with
+    | 1 -> "N"
+    | 3 -> "E"
+    | 5 -> "S"
+    | 7 -> "W"
+    | _ -> "?"
+
+(*
     Returns a PieceResult (Piece wrapped in a Result) given the values passed to create the piece.
 *)
 let CreatePiece side name piecetype period facing =

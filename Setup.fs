@@ -5,7 +5,7 @@ open GamePieces
 open Board
 open System
 
-let ProcessSetupFromDefinition (board : Board) (definition : string[]) : Board =
+let ProcessSetupFromDefinition board definition =
     let mutable currentSide = None
     let mutable newBoard = board
     Array.iter (fun (line : string) ->
@@ -24,3 +24,12 @@ let ProcessSetupFromDefinition (board : Board) (definition : string[]) : Board =
         | _ -> raise (new InvalidDataException (sprintf "ERROR: Parsing failure on line %s" line))
     ) definition
     newBoard
+
+let ProcessSetupFromFile fileNameAndPath board =
+    try
+        let definition = IO.File.ReadAllLines fileNameAndPath
+        ProcessSetupFromDefinition board definition
+    with
+        | :? FileNotFoundException as fnfex -> raise fnfex
+        | :? InvalidDataException as idex -> raise idex
+        | _ as ex -> raise ex
