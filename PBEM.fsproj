@@ -6,7 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Pieces.fs" />
+    <Compile Include="Pure.fs" />
+    <Compile Include="Piece.fs" />
     <Compile Include="Board.fs" />
     <Compile Include="Setup.fs" />
     <Compile Include="Moves.fs" />

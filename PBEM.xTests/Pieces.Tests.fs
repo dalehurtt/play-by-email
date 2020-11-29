@@ -1,50 +1,50 @@
 ﻿module PBEM.xTests.Pieces
 
 open Xunit
-open Pieces
+open PBEM
 
 [<Theory>]
-[<InlineData (PieceType.Infantry, Period.Ancient)>]
-[<InlineData (PieceType.Warband, Period.DarkAges)>]
-[<InlineData (PieceType.MenAtArms, Period.Medieval)>]
-[<InlineData (PieceType.Reiters, Period.Pike)>]
-[<InlineData (PieceType.Skirmishers, Period.Musket)>]
-[<InlineData (PieceType.Artillery, Period.Rifle)>]
-[<InlineData (PieceType.Zouaves, Period.ACW)>]
-[<InlineData (PieceType.HeavyInfantry, Period.Machine)>]
-[<InlineData (PieceType.Tanks, Period.Modern)>]
+[<InlineData (Piece.PieceType.Infantry, Piece.Period.Ancient)>]
+[<InlineData (Piece.PieceType.Warband, Piece.Period.DarkAges)>]
+[<InlineData (Piece.PieceType.MenAtArms, Piece.Period.Medieval)>]
+[<InlineData (Piece.PieceType.Reiters, Piece.Period.Pike)>]
+[<InlineData (Piece.PieceType.Skirmishers, Piece.Period.Musket)>]
+[<InlineData (Piece.PieceType.Artillery, Piece.Period.Rifle)>]
+[<InlineData (Piece.PieceType.Zouaves, Piece.Period.ACW)>]
+[<InlineData (Piece.PieceType.HeavyInfantry, Piece.Period.Machine)>]
+[<InlineData (Piece.PieceType.Tanks, Piece.Period.Modern)>]
 let ``Tests for valid game pieces by period`` (pieceType, period) =
     let expected = true
-    let actual = IsValidPiece pieceType period
+    let actual = Piece.IsValid pieceType period
     Assert.Equal (expected, actual)
 
 [<Theory>]
-[<InlineData (PieceType.Warband, Period.Ancient)>]
-[<InlineData (PieceType.Archers, Period.DarkAges)>]
-[<InlineData (PieceType.Infantry, Period.Medieval)>]
-[<InlineData (PieceType.Artillery, Period.Pike)>]
-[<InlineData (PieceType.Reiters, Period.Musket)>]
-[<InlineData (PieceType.Zouaves, Period.Rifle)>]
-[<InlineData (PieceType.Skirmishers, Period.ACW)>]
-[<InlineData (PieceType.Tanks, Period.Machine)>]
-[<InlineData (PieceType.HeavyInfantry, Period.Modern)>]
+[<InlineData (Piece.PieceType.Warband, Piece.Period.Ancient)>]
+[<InlineData (Piece.PieceType.Archers, Piece.Period.DarkAges)>]
+[<InlineData (Piece.PieceType.Infantry, Piece.Period.Medieval)>]
+[<InlineData (Piece.PieceType.Artillery, Piece.Period.Pike)>]
+[<InlineData (Piece.PieceType.Reiters, Piece.Period.Musket)>]
+[<InlineData (Piece.PieceType.Zouaves, Piece.Period.Rifle)>]
+[<InlineData (Piece.PieceType.Skirmishers, Piece.Period.ACW)>]
+[<InlineData (Piece.PieceType.Tanks, Piece.Period.Machine)>]
+[<InlineData (Piece.PieceType.HeavyInfantry, Piece.Period.Modern)>]
 let ``Tests for invalid game pieces by period`` (pieceType, period) =
     let expected = false
-    let actual = IsValidPiece pieceType period
+    let actual = Piece.IsValid pieceType period
     Assert.Equal (expected, actual)
 
 [<Theory>]
-[<InlineData (PieceType.Warband, Period.Ancient)>]
-[<InlineData (PieceType.Archers, Period.DarkAges)>]
-[<InlineData (PieceType.Infantry, Period.Medieval)>]
-[<InlineData (PieceType.Archers, Period.Pike)>]
-[<InlineData (PieceType.Reiters, Period.Musket)>]
-[<InlineData (PieceType.Zouaves, Period.Rifle)>]
-[<InlineData (PieceType.Skirmishers, Period.ACW)>]
-[<InlineData (PieceType.Tanks, Period.Machine)>]
-[<InlineData (PieceType.HeavyInfantry, Period.Modern)>]
+[<InlineData (Piece.PieceType.Warband, Piece.Period.Ancient)>]
+[<InlineData (Piece.PieceType.Archers, Piece.Period.DarkAges)>]
+[<InlineData (Piece.PieceType.Infantry, Piece.Period.Medieval)>]
+[<InlineData (Piece.PieceType.Archers, Piece.Period.Pike)>]
+[<InlineData (Piece.PieceType.Reiters, Piece.Period.Musket)>]
+[<InlineData (Piece.PieceType.Zouaves, Piece.Period.Rifle)>]
+[<InlineData (Piece.PieceType.Skirmishers, Piece.Period.ACW)>]
+[<InlineData (Piece.PieceType.Tanks, Piece.Period.Machine)>]
+[<InlineData (Piece.PieceType.HeavyInfantry, Piece.Period.Modern)>]
 let ``Creation tests for invalid game pieces by period`` (pieceType, period) =
-    let actual = CreatePiece Side.Red "A" pieceType period  1
+    let actual = Piece.Create Piece.Side.Red "A" pieceType period  1
     match actual with
     | Some piece -> Assert.False (true)
     | None -> Assert.True (true)
@@ -55,7 +55,7 @@ let ``Creation tests for invalid game pieces by period`` (pieceType, period) =
 [<InlineData (5)>]
 [<InlineData (7)>]
 let ``Create a game piece facing a valid direction`` facing =
-    let actual = CreatePiece Side.Red "A" PieceType.Infantry Period.Ancient facing
+    let actual = Piece.Create Piece.Side.Red "A" Piece.PieceType.Infantry Piece.Period.Ancient facing
     Assert.True (actual.IsSome)
     Assert.True (actual.Value.Facing = facing)
 
@@ -67,6 +67,6 @@ let ``Create a game piece facing a valid direction`` facing =
 [<InlineData (8)>]
 [<InlineData (9)>]
 let ``Create a game piece facing an invalid direction`` facing =
-    let actual = CreatePiece Side.Red "A" PieceType.Infantry Period.Ancient facing
+    let actual = Piece.Create Piece.Side.Red "A" Piece.PieceType.Infantry Piece.Period.Ancient facing
     Assert.True (actual.IsNone)
 

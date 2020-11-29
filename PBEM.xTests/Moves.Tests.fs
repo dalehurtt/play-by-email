@@ -1,9 +1,9 @@
 module PBEM.xTests.Moves
 
 open Xunit
-open Pieces
-open Board
 open Setup
+open Board
+open PBEM
 
 type MoveTests () =
     let boardDefinition = [|
@@ -17,15 +17,15 @@ type MoveTests () =
 
     [<Fact>]
     let ``Add game piece to a cell`` () =
-        let piece = CreatePiece Side.Red "Red01" PieceType.Infantry Period.Ancient 1
-        let testBoard = MoveGamePiece piece (0, 0) (1, 1) board
+        let piece = Piece.Create Piece.Side.Red "Red01" Piece.PieceType.Infantry Piece.Period.Ancient 1
+        let testBoard = MoveGamePiece piece.Value (0, 0) (1, 1) board
         Assert.True ((GetCell testBoard.Cells 1 1).Value.Piece = piece)
 
     [<Fact>]
     let ``Move game piece from one cell to another`` () =
-        let piece = CreatePiece Side.Red "Red01" PieceType.Infantry Period.Ancient 1
-        let startBoard = MoveGamePiece piece (0, 0) (1, 1) board
-        let endBoard = MoveGamePiece piece (1, 1) (1, 2) startBoard
+        let piece = Piece.Create Piece.Side.Red "Red01" Piece.PieceType.Infantry Piece.Period.Ancient 1
+        let startBoard = MoveGamePiece piece.Value (0, 0) (1, 1) board
+        let endBoard = MoveGamePiece piece.Value (1, 1) (1, 2) startBoard
         Assert.True ((GetCell endBoard.Cells 1 1).Value.Piece.IsNone)
         Assert.True ((GetCell endBoard.Cells 1 2).Value.Piece = piece)
 
@@ -34,12 +34,12 @@ type MoveTests () =
     [<InlineData(1,5)>]
     [<InlineData(3,7)>]
     let ``Move game piece from one cell to another while changing facing`` (facing, newFacing) =
-        let piece = CreatePiece Side.Red "Red01" PieceType.Infantry Period.Ancient facing
-        let startBoard = MoveGamePiece piece (0, 0) (1, 1) board
-        let newPiece = ChangeFacing newFacing piece
+        let piece = Piece.Create Piece.Side.Red "Red01" Piece.PieceType.Infantry Piece.Period.Ancient facing
+        let startBoard = MoveGamePiece piece.Value (0, 0) (1, 1) board
+        let newPiece = piece.Value.ChangeFacing newFacing
         let endBoard = MoveGamePiece newPiece (1, 1) (1, 2) startBoard
         Assert.True ((GetCell endBoard.Cells 1 1).Value.Piece.IsNone)
-        Assert.True ((GetCell endBoard.Cells 1 2).Value.Piece = newPiece)
+        Assert.True ((GetCell endBoard.Cells 1 2).Value.Piece.Value = newPiece)
 
     [<Fact>]
     let ``Process setup definition`` () =

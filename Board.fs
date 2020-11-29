@@ -2,7 +2,8 @@
 
 open System
 open System.IO
-open Pieces
+open Pure
+open PBEM
 
 // ======================================== DATA TYPES ========================================
 
@@ -42,7 +43,7 @@ type Cell = {
     Col : int
     Terrain : Terrain
     Road : int[] option
-    Piece : Piece option
+    Piece : Piece.T option
 }
 
 (*
@@ -57,8 +58,8 @@ type Board = {
     RowCount : int
     ColCount : int
     Cells : List<Cell>
-    Off : List<Piece option>
-    Dead : List<Piece option>
+    Off : List<Piece.T>
+    Dead : List<Piece.T>
 }
 
 // ======================================== CALCULATION FUNCTIONS ========================================
@@ -243,7 +244,7 @@ let IsValidAllRoads board =
     TODO: You cannot add the piece if there is already a piece there.
 *)
 let AddPieceToCell piece cell =
-    { cell with Piece = piece }
+    { cell with Piece = Some piece }
 
 (*
     Return a cell after removing a piece from it.
@@ -257,7 +258,7 @@ let RemovePieceFromCell piece cell =
 (*
     Moves a game piece from one cell to another on the board.
 *)
-let MoveGamePiece (piece : Piece option) (fromRow, fromCol) (toRow, toCol) board =
+let MoveGamePiece (piece : Piece.T) (fromRow, fromCol) (toRow, toCol) board =
     let fromCell =
         match fromRow + fromCol with
         | 0 -> None
@@ -329,7 +330,7 @@ let IsValidBoard (board : Board) =
 *)
 let CreateBoardFromDefinition (boardDefinition : string[]) =
     let mutable cells : List<Cell> = List<Cell>.Empty
-    let mutable board = { RowCount = 0; ColCount = 0; Cells = cells; Off = List<Piece option>.Empty; Dead = List<Piece option>.Empty }
+    let mutable board = { RowCount = 0; ColCount = 0; Cells = cells; Off = List<Piece.T>.Empty; Dead = List<Piece.T>.Empty }
     // The first character of the first line must be B
     match boardDefinition.[0].[0] with
     | 'B' ->
@@ -417,7 +418,7 @@ let VisualizeMap board =
                 match c.Piece with
                 | Some p -> 
                     printf "|"
-                    if p.Side = Side.Red then Console.BackgroundColor <- ConsoleColor.Red
+                    if p.Side = Piece.Side.Red then Console.BackgroundColor <- ConsoleColor.Red
                     else Console.BackgroundColor <- ConsoleColor.Blue
                     printf "%6s %s" p.Name  (FacingToString p.Facing)
                     Console.BackgroundColor <- bgColor
@@ -437,13 +438,10 @@ let VisualizeMap board =
     if board.Off.Length > 0 then
         for i in 0..board.Off.Length - 1 do
             let piece = board.Off.[i]
-            match piece with
-            | Some p ->
-                if p.Side = Side.Red then Console.BackgroundColor <- ConsoleColor.Red
-                else Console.BackgroundColor <- ConsoleColor.Blue
-                printf " %6s" p.Name
-                Console.BackgroundColor <- bgColor
-            | None -> ()
+            if piece.Side = Piece.Side.Red then Console.BackgroundColor <- ConsoleColor.Red
+            else Console.BackgroundColor <- ConsoleColor.Blue
+            printf " %6s" piece.Name
+            Console.BackgroundColor <- bgColor
     else printf " None"
     printfn ""
     // Draw the game pieces that are dead
@@ -451,12 +449,9 @@ let VisualizeMap board =
     if board.Dead.Length > 0 then
         for i in 0..board.Dead.Length - 1 do
             let piece = board.Dead.[i]
-            match piece with
-            | Some p ->
-                if p.Side = Side.Red then Console.BackgroundColor <- ConsoleColor.Red
-                else Console.BackgroundColor <- ConsoleColor.Blue
-                printf " %6s" p.Name
-                Console.BackgroundColor <- bgColor
-            | None -> ()
+            if piece.Side = Piece.Side.Red then Console.BackgroundColor <- ConsoleColor.Red
+            else Console.BackgroundColor <- ConsoleColor.Blue
+            printf " %6s" piece.Name
+            Console.BackgroundColor <- bgColor
     else printf " None"
     printfn ""
