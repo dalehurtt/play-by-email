@@ -3,21 +3,21 @@
 open System
 open System.IO
 open Board
-open Pieces
+open PBEM
 open System.IO
 
 let ProcessMovesFromDefinition (board : Board) (definition : string[]) : Board =
-    let mutable currentSide = None
+    let mutable currentSide = Piece.Side.Red
     let mutable newBoard = board
     Array.iter (fun (line : string) ->
         let parts = line.Split ([|'`'|])
         match parts.[0] with
         | "S" ->
             match parts.[1] with
-            | "R" -> currentSide <- Some Red
-            | "B" -> currentSide <- Some Blue
+            | "R" -> currentSide <- Piece.Side.Red
+            | "B" -> currentSide <- Piece.Side.Blue
             | _ -> raise (new InvalidDataException (sprintf "ERROR: Parsing failure on line %s" line))
-            printfn "\nProcessing moves for %O Turn %s" currentSide.Value parts.[2]
+            printfn "\nProcessing moves for %O Turn %s" currentSide parts.[2]
 
         | "M" ->
             let (fromRow, fromCol) = (int parts.[2]), (int parts.[3])
@@ -27,7 +27,7 @@ let ProcessMovesFromDefinition (board : Board) (definition : string[]) : Board =
             | Some c ->
                 let piece = c.Piece
                 match piece with
-                | Some p -> newBoard <- MoveGamePiece piece (fromRow, fromCol) (toRow, toCol) newBoard
+                | Some p -> newBoard <- MoveGamePiece p (fromRow, fromCol) (toRow, toCol) newBoard
                 | None -> 
                     printfn "ERR Move piece from %i %i to %i %i: no piece" fromRow fromCol toRow toCol
              | None ->
@@ -36,14 +36,14 @@ let ProcessMovesFromDefinition (board : Board) (definition : string[]) : Board =
             let (fromRow, fromCol) = (int parts.[2]), (int parts.[3])
             let mutable cell = GetCell newBoard.Cells fromRow fromCol
             let facing = (int parts.[4])
-            match IsValidFacing facing with
+            match Piece.IsValidFacing facing with
             | true ->
                 match cell with
                 | Some c ->
                     let mutable piece = c.Piece
                     match piece with
                     | Some p -> 
-                        piece <- ChangeFacing facing piece
+                        piece <- Some (p.ChangeFacing facing)
                         cell <- Some { cell.Value with Piece = piece }
                         newBoard <- { newBoard with Cells = (ReplaceCell newBoard.Cells cell.Value) }
                     | None -> printfn "ERR Change piece facing in %i %i to %i: no piece" fromRow fromCol facing
